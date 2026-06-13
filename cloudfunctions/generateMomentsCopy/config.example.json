@@ -1,0 +1,13 @@
+{
+	"permissions": {
+		"openapi": []
+	},
+	"timeout": 60,
+	"envVariables": {
+		"AI_PROVIDER": "hunyuan-exp",
+		"AI_MODEL": "hunyuan-2.0-instruct-20251111",
+		"LLM_API_KEY": "",
+		"LLM_BASE_URL": "https://api.deepseek.com/anthropic",
+		"LLM_MODEL": "deepseek-v4-flash"
+	}
+}

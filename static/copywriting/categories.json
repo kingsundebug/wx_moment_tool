@@ -1,0 +1,8 @@
+[
+	{ "id": "motivation", "name": "励志", "icon": "💪" },
+	{ "id": "chicken-soup", "name": "心灵鸡汤", "icon": "🍵" },
+	{ "id": "love", "name": "情感", "icon": "💕" },
+	{ "id": "work", "name": "职场", "icon": "💼" },
+	{ "id": "festival", "name": "节日", "icon": "🎉" },
+	{ "id": "life", "name": "生活", "icon": "🌿" }
+]

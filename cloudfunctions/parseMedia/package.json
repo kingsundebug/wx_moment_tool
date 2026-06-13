@@ -1,0 +1,9 @@
+{
+  "name": "parseMedia",
+  "version": "1.0.0",
+  "description": "解析抖音/小红书链接",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

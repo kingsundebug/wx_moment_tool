@@ -1,0 +1,6 @@
+node_modules/
+unpackage/
+.hbuilderx/
+.DS_Store
+config/cloud.js
+cloudfunctions/*/node_modules/

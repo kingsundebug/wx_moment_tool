@@ -1,0 +1,127 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "朋友圈助手"
+			}
+		},
+		{
+			"path": "pages/copywriting/index",
+			"style": {
+				"navigationBarTitleText": "文案"
+			}
+		},
+		{
+			"path": "pages/mine/index",
+			"style": {
+				"navigationBarTitleText": "我的"
+			}
+		},
+		{
+			"path": "pages/copywriting/ai",
+			"style": {
+				"navigationBarTitleText": "AI 文案"
+			}
+		},
+		{
+			"path": "pages/copywriting/result",
+			"style": {
+				"navigationBarTitleText": "生成文案"
+			}
+		},
+		{
+			"path": "pages/copywriting/library",
+			"style": {
+				"navigationBarTitleText": "文案库"
+			}
+		},
+		{
+			"path": "pages/tools/watermark/watermark",
+			"style": {
+				"navigationBarTitleText": "去水印"
+			}
+		},
+		{
+			"path": "pages/tools/grid-split/grid-split",
+			"style": {
+				"navigationBarTitleText": "九宫格切图"
+			}
+		},
+		{
+			"path": "pages/tools/long-stitch/long-stitch",
+			"style": {
+				"navigationBarTitleText": "拼长图"
+			}
+		},
+		{
+			"path": "pages/tools/text-image/text-image",
+			"style": {
+				"navigationBarTitleText": "文字配图"
+			}
+		},
+		{
+			"path": "pages/tools/text-image/result",
+			"style": {
+				"navigationBarTitleText": "生成图片"
+			}
+		},
+		{
+			"path": "pages/tools/anti-fold/anti-fold",
+			"style": {
+				"navigationBarTitleText": "防折叠"
+			}
+		},
+		{
+			"path": "pages/tools/emoji/emoji",
+			"style": {
+				"navigationBarTitleText": "特殊符号"
+			}
+		},
+		{
+			"path": "pages/tools/inspiration-calendar/inspiration-calendar",
+			"style": {
+				"navigationBarTitleText": "发圈灵感"
+			}
+		},
+		{
+			"path": "pages/draft/list",
+			"style": {
+				"navigationBarTitleText": "我的草稿"
+			}
+		},
+		{
+			"path": "pages/draft/edit",
+			"style": {
+				"navigationBarTitleText": "编辑草稿"
+			}
+		},
+		{
+			"path": "pages/mine/settings",
+			"style": {
+				"navigationBarTitleText": "设置"
+			}
+		},
+		{
+			"path": "pages/mine/about",
+			"style": {
+				"navigationBarTitleText": "隐私与协议"
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "朋友圈助手",
+		"navigationBarBackgroundColor": "#FFFFFF",
+		"backgroundColor": "#F5F6F8"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^tab-bar": "@/components/tab-bar/tab-bar.vue",
+			"^tool-card": "@/components/tool-card/tool-card.vue",
+			"^copy-card": "@/components/copy-card/copy-card.vue"
+		}
+	},
+	"uniIdRouter": {}
+}

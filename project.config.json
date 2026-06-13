@@ -1,0 +1,10 @@
+{
+  "appid": "wx4adbc7ddfe64214c",
+  "cloudfunctionRoot": "cloudfunctions/",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "minified": true
+  },
+  "compileType": "miniprogram"
+}

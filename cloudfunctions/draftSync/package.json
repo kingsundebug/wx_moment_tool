@@ -1,0 +1,9 @@
+{
+  "name": "draftSync",
+  "version": "1.0.0",
+  "description": "草稿云端同步",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
