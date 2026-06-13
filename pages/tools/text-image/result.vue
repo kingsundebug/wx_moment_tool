@@ -42,7 +42,9 @@
 		<canvas
 			canvas-id="textImageCanvas"
 			id="textImageCanvas"
-			class="hidden-canvas"
+			class="offscreen-canvas"
+			:width="canvasW"
+			:height="canvasH"
 			:style="{ width: canvasW + 'px', height: canvasH + 'px' }"
 		/>
 	</view>
@@ -131,7 +133,7 @@ export default {
 				this.canvasW = size.width
 				this.canvasH = size.height
 				await this.$nextTick()
-				await new Promise((r) => setTimeout(r, 120))
+				await new Promise((r) => setTimeout(r, 300))
 
 				const res = await renderTextImage(
 					this.session.inputText,
@@ -307,12 +309,13 @@ export default {
 	opacity: 0.85;
 }
 
-.hidden-canvas {
+.offscreen-canvas {
 	position: fixed;
-	left: 0;
+	left: -9999px;
 	top: 0;
+	width: 1px;
+	height: 1px;
 	opacity: 0;
 	pointer-events: none;
-	z-index: -1;
 }
 </style>

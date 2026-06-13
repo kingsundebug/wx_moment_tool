@@ -42,13 +42,7 @@
 					@tap="selectTemplate(tpl.id)"
 				>
 					<view class="tpl-preview">
-						<image
-							v-if="tpl.bg?.type === 'image'"
-							:src="resolveTemplatePreviewSrc(tpl)"
-							class="tpl-preview__img"
-							mode="aspectFill"
-						/>
-						<view v-else class="tpl-preview__fill" :style="previewStyle(tpl)">
+						<view class="tpl-preview__fill" :style="previewStyle(tpl)">
 							<text class="tpl-preview__text" :style="{ color: tpl.textColor }">Aa</text>
 						</view>
 					</view>
@@ -65,7 +59,6 @@
 import templatesData from '@/static/text-image/templates.json'
 import { SHORT_MAX_CHARS, LONG_MAX_CHARS } from '@/utils/text-image.js'
 import { saveTextImageSession } from '@/utils/text-image-session.js'
-import { resolveTemplatePreviewSrc } from '@/utils/text-image-path.js'
 
 export default {
 	data() {
@@ -92,27 +85,23 @@ export default {
 	},
 	onLoad() {
 		const list = this.shortTemplates
-		const firstImage = list.find((t) => t.bg?.type === 'image')
-		this.selectedId = firstImage?.id || list[0]?.id || ''
+		this.selectedId = list[0]?.id || ''
 	},
 	methods: {
 		switchMode(mode) {
 			if (this.mode === mode) return
 			this.mode = mode
 			const list = mode === 'short' ? this.shortTemplates : this.longTemplates
-			const firstImage = list.find((t) => t.bg?.type === 'image')
-			this.selectedId = firstImage?.id || list[0]?.id || ''
+			this.selectedId = list[0]?.id || ''
 		},
 		selectTemplate(id) {
 			this.selectedId = id
 		},
-		resolveTemplatePreviewSrc(tpl) {
-			return resolveTemplatePreviewSrc(tpl)
-		},
 		previewStyle(tpl) {
 			if (tpl.bg?.type === 'gradient' && tpl.bg.colors?.length) {
+				const dir = tpl.bg.vertical === false ? '90deg' : '180deg'
 				return {
-					background: `linear-gradient(180deg, ${tpl.bg.colors.join(', ')})`
+					background: `linear-gradient(${dir}, ${tpl.bg.colors.join(', ')})`
 				}
 			}
 			return { background: tpl.bg?.color || '#f5f6f8' }
@@ -247,11 +236,6 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-}
-
-.tpl-preview__img {
-	width: 100%;
-	height: 100%;
 }
 
 .tpl-preview__text {

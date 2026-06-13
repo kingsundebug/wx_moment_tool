@@ -1,26 +1,6 @@
-import { resolveStaticImageSrc } from '@/utils/text-image-path.js'
-
 const MAX_LONG_HEIGHT = 12000
 const SHORT_MAX_CHARS = 80
 const LONG_MAX_CHARS = 3000
-
-function loadLocalImage(src) {
-	const resolvedSrc = resolveStaticImageSrc(src)
-	return new Promise((resolve, reject) => {
-		const timer = setTimeout(() => reject(new Error('背景图加载超时')), 8000)
-		uni.getImageInfo({
-			src: resolvedSrc,
-			success: (res) => {
-				clearTimeout(timer)
-				resolve(res.path)
-			},
-			fail: (err) => {
-				clearTimeout(timer)
-				reject(new Error(err?.errMsg || '背景图加载失败'))
-			}
-		})
-	})
-}
 
 async function flushCanvas(ctx, reserve = false, delayMs = 80) {
 	return new Promise((resolve, reject) => {
@@ -64,16 +44,6 @@ function exportCanvas(canvasId, width, height, component) {
 }
 
 async function drawBackground(ctx, w, h, bg) {
-	if (bg.type === 'image') {
-		const path = await loadLocalImage(bg.src)
-		ctx.drawImage(path, 0, 0, w, h)
-		if (bg.overlay) {
-			ctx.setFillStyle(bg.overlay)
-			ctx.fillRect(0, 0, w, h)
-		}
-		return
-	}
-
 	if (bg.type === 'gradient' && bg.colors && bg.colors.length >= 2) {
 		const grd = bg.vertical
 			? ctx.createLinearGradient(0, 0, 0, h)
@@ -293,15 +263,7 @@ export async function renderTextImage(text, template, mode, { canvasId, componen
 	const { width, height } = calcCanvasSize(trimmed, template, mode)
 	const ctx = uni.createCanvasContext(canvasId, component)
 
-	await drawBackground(ctx, width, height, template.bg).catch((err) => {
-		if (template.bg?.type === 'image') {
-			ctx.setFillStyle('#F5F6F8')
-			ctx.fillRect(0, 0, width, height)
-			console.warn('背景图加载失败，已使用默认底色', err)
-			return
-		}
-		throw err
-	})
+	await drawBackground(ctx, width, height, template.bg)
 
 	const padding = template.padding || 56
 
