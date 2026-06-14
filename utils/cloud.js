@@ -15,8 +15,27 @@ export const ERROR_MSG = {
 	CLOUD_NOT_READY: '云开发未就绪，请确认已开通并填写环境 ID',
 	MOMENTS_CLOUD_FAIL:
 		'云函数调用失败，请确认 generateMomentsCopy 已上传部署到云端',
+	PARSE_MEDIA_FAIL:
+		'云函数 parseMedia 未部署，请在开发者工具中上传 cloudfunctions/parseMedia',
 	FUNCTION_TIMEOUT:
 		'云函数执行超时，请在云开发控制台将 generateMomentsCopy 超时时间改为 60 秒后重试'
+}
+
+/**
+ * @param {string} functionName
+ * @param {unknown} err
+ * @returns {string}
+ */
+export function getCloudFunctionError(functionName, err) {
+	const raw = getErrorMessage(err)
+	const errMsg = err && typeof err === 'object' && 'errMsg' in err ? String(err.errMsg) : raw
+	if (/FUNCTION_NOT_FOUND|501000|could not find function/i.test(errMsg)) {
+		return `云函数「${functionName}」未部署。\n\n请在微信开发者工具左侧展开 cloudfunctions → 右键 ${functionName} → 上传并部署：云端安装依赖`
+	}
+	if (/502005|DATABASE_COLLECTION_NOT_EXIST|parse_logs/i.test(errMsg)) {
+		return '云数据库集合 parse_logs 不存在。请重新部署 parseMedia 云函数，或在云开发控制台 → 数据库 → 新建集合 parse_logs'
+	}
+	return raw
 }
 
 /**

@@ -26,12 +26,23 @@
 			<text v-if="result.title" class="title">{{ result.title }}</text>
 			<image v-if="result.cover" :src="result.cover" class="cover" mode="aspectFill" />
 
-			<video
-				v-if="result.videoUrl"
-				:src="result.videoUrl"
-				class="video"
-				controls
-			/>
+			<view v-if="result.videoCodec === 'hevc'" class="codec-tip">
+				<text>该视频为 H.265 编码，小程序内可能只有声音无画面。保存后可用系统相册或其他播放器正常观看。</text>
+			</view>
+
+			<view v-if="result.videoUrl || result.videoFileID" class="video-wrap">
+				<view v-if="videoLoading" class="video-loading">视频加载中…</view>
+				<video
+					v-else-if="videoPlayPath"
+					:src="videoPlayPath"
+					class="video"
+					controls
+					object-fit="contain"
+				/>
+				<view v-else class="video-fallback">
+					<text>预览加载失败，可点击下方「保存视频」重试</text>
+				</view>
+			</view>
 
 			<view v-if="result.images && result.images.length" class="images">
 				<image
@@ -45,7 +56,7 @@
 			</view>
 
 			<view class="actions">
-				<button v-if="result.videoUrl" type="primary" @tap="saveVideo">保存视频</button>
+				<button v-if="result.videoUrl || result.videoFileID" type="primary" @tap="saveVideo">保存视频</button>
 				<button v-if="result.images && result.images.length" type="primary" @tap="saveImages">保存图集</button>
 				<button @tap="saveToDraft">存草稿</button>
 			</view>
@@ -57,9 +68,9 @@
 
 <script>
 import { extractUrl } from '@/utils/extract-url.js'
-import { callCloud } from '@/utils/cloud.js'
+import { callCloud, getCloudFunctionError } from '@/utils/cloud.js'
 import { draftStore } from '@/utils/draft-store.js'
-import { saveMediaToAlbum } from '@/utils/media-download.js'
+import { saveMediaToAlbum, downloadMedia, downloadFromCloudFile } from '@/utils/media-download.js'
 import { pasteText } from '@/utils/anti-fold.js'
 
 export default {
@@ -67,7 +78,9 @@ export default {
 		return {
 			inputText: '',
 			loading: false,
-			result: null
+			videoLoading: false,
+			result: null,
+			videoPlayPath: ''
 		}
 	},
 	methods: {
@@ -85,20 +98,28 @@ export default {
 			}
 			this.loading = true
 			this.result = null
+			this.videoPlayPath = ''
+			uni.showLoading({ title: '解析中', mask: true })
 			try {
 				const res = await callCloud('parseMedia', { url })
 				if (res.code !== 0) {
 					throw new Error(res.message || '解析失败')
 				}
 				this.result = res.data
+				if (this.result.videoFileID) {
+					await this.loadVideoFromCloud()
+				} else if (this.result.videoUrl) {
+					await this.loadVideoPreview()
+				}
 			} catch (e) {
 				uni.showModal({
 					title: '解析失败',
-					content: e.message || '请确认云函数 parseMedia 已部署',
+					content: getCloudFunctionError('parseMedia', e),
 					showCancel: false
 				})
 			} finally {
 				this.loading = false
+				uni.hideLoading()
 			}
 		},
 		platformLabel(p) {
@@ -113,13 +134,58 @@ export default {
 				current: this.result.images[index]
 			})
 		},
-		async saveVideo() {
-			uni.showLoading({ title: '保存中' })
+		async loadVideoFromCloud() {
+			if (!this.result?.videoFileID) return
+			this.videoLoading = true
+			this.videoPlayPath = ''
 			try {
-				await saveMediaToAlbum(this.result.videoUrl, 'video')
+				this.videoPlayPath = await downloadFromCloudFile(this.result.videoFileID)
+			} catch (e) {
+				console.warn('cloud video load failed', e)
+			} finally {
+				this.videoLoading = false
+			}
+		},
+		async loadVideoPreview() {
+			if (!this.result?.videoUrl) return
+			this.videoLoading = true
+			this.videoPlayPath = ''
+			try {
+				const candidates = this.result.videoCandidates || [this.result.videoUrl]
+				this.videoPlayPath = await downloadMedia(this.result.videoUrl, 'video', candidates)
+			} catch (e) {
+				console.warn('video preview failed', e)
+			} finally {
+				this.videoLoading = false
+			}
+		},
+		async saveVideo() {
+			if (!this.result?.videoUrl && !this.result?.videoFileID) return
+			uni.showLoading({ title: '保存中', mask: true })
+			try {
+				let path = this.videoPlayPath
+				if (!path) {
+					if (this.result.videoFileID) {
+						path = await downloadFromCloudFile(this.result.videoFileID)
+					} else {
+						const candidates = this.result.videoCandidates || [this.result.videoUrl]
+						path = await downloadMedia(this.result.videoUrl, 'video', candidates)
+					}
+				}
+				await new Promise((resolve, reject) => {
+					uni.saveVideoToPhotosAlbum({
+						filePath: path,
+						success: resolve,
+						fail: reject
+					})
+				})
 				uni.showToast({ title: '已保存', icon: 'success' })
 			} catch (e) {
-				uni.showToast({ title: '保存失败，请重试', icon: 'none' })
+				uni.showModal({
+					title: '保存失败',
+					content: e.message || '请检查相册权限或重新解析',
+					showCancel: false
+				})
 			} finally {
 				uni.hideLoading()
 			}
@@ -195,6 +261,34 @@ export default {
 	height: 360rpx;
 	border-radius: 12rpx;
 	margin: 12rpx 0;
+}
+.codec-tip {
+	background: #fff7e6;
+	border: 1rpx solid #ffd591;
+	border-radius: 12rpx;
+	padding: 16rpx 20rpx;
+	margin-bottom: 16rpx;
+	font-size: 24rpx;
+	color: #ad6800;
+	line-height: 1.5;
+}
+.video-wrap {
+	margin: 12rpx 0;
+}
+.video-loading,
+.video-fallback {
+	width: 100%;
+	height: 400rpx;
+	border-radius: 12rpx;
+	background: #111;
+	color: #ccc;
+	font-size: 26rpx;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 24rpx;
+	box-sizing: border-box;
 }
 .video {
 	width: 100%;
